@@ -1,134 +1,101 @@
 // src/components/Hero.jsx
-
-import { View, Text, StyleSheet, Image, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, useWindowDimensions } from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS } from '../theme/theme';
+import FadeInView from './FadeInView';
+import PremiumButton from './PremiumButton'; 
+import profilePic from '../assets/profile.jpg'; 
 
-export default function Hero() {
-  // Get window dimensions to handle responsive layout
+export default function Hero({ scrollToSection }) {
   const { width } = useWindowDimensions();
   const isMobile = width < BREAKPOINTS.tablet;
 
   return (
-    <View 
-      style={[
-        styles.heroContainer, 
-        // Switch between row (web) and column-reverse (mobile)
-        { flexDirection: isMobile ? 'column-reverse' : 'row' }
-      ]}
-    >
-      {/* Left Side: Text Content */}
-      <View 
-        style={[
-          styles.textContent, 
-          // Center text on mobile, align left on web
-          { alignItems: isMobile ? 'center' : 'flex-start' }
-        ]}
-      >
-        <Text style={styles.greetingText}>Hello, I am</Text>
-        
-        <Text 
-          style={[
-            styles.nameText, 
-            { fontSize: isMobile ? SIZES.headerMobile : SIZES.headerWeb }
-          ]}
-        >
-        Md. Shazzadur Rahman Piash
-        </Text>
-        
-        <Text 
-          style={[
-            styles.descriptionText,
-            { textAlign: isMobile ? 'center' : 'left' }
-          ]}
-        >
-          A passionate React Native developer building cross-platform applications 
-          with beautiful and consistent user interfaces.
-        </Text>
+    <View style={[styles.heroContainer, { flexDirection: isMobile ? 'column-reverse' : 'row' }]}>
+      
+      {/* Text Content Area */}
+      <View style={[styles.textContent, { alignItems: isMobile ? 'center' : 'flex-start' }]}>
+        <FadeInView delay={100}>
+          <Text style={styles.greetingText}>Hello, I am</Text>
+        </FadeInView>
 
-        {/* Call to Action Button */}
-        <TouchableOpacity 
-          style={[
-            styles.primaryButton,
-            { padding: isMobile ? SIZES.buttonPaddingMobile : SIZES.buttonPaddingWeb }
-          ]}
-        >
-          <Text style={styles.buttonText}>Download Resume</Text>
-        </TouchableOpacity>
+        <FadeInView delay={300}>
+          <Text style={[styles.nameText, { fontSize: isMobile ? SIZES.headerMobile : SIZES.headerWeb }]}>
+            Your Name
+          </Text>
+        </FadeInView>
+        
+        <FadeInView delay={500}>
+          <Text style={[styles.descriptionText, { textAlign: isMobile ? 'center' : 'left' }]}>
+            A passionate React Native developer building cross-platform applications 
+            with beautiful and consistent user interfaces.
+          </Text>
+        </FadeInView>
+
+        <FadeInView delay={700}>
+          <View style={[styles.buttonsContainer, { flexDirection: isMobile ? 'column' : 'row' }]}>
+            
+            {/* Navigates smoothly down to the Projects section */}
+            <View style={[styles.btnWrapper, { 
+              marginRight: isMobile ? 0 : SPACING.md,
+              marginBottom: isMobile ? SPACING.md : 0,
+              width: isMobile ? '100%' : 'auto'
+            }]}>
+              <PremiumButton 
+                title="View Projects" 
+                variant="primary"
+                onPress={() => scrollToSection('Projects')}
+              />
+            </View>
+
+            {/* Navigates smoothly down to the About section */}
+            <View style={[styles.btnWrapper, { width: isMobile ? '100%' : 'auto' }]}>
+              <PremiumButton 
+                title="About Me" 
+                variant="secondary"
+                onPress={() => scrollToSection('About')}
+              />
+            </View>
+
+          </View>
+        </FadeInView>
       </View>
 
-      {/* Right Side: Image/Avatar */}
-      <View 
-        style={[
-          styles.imageContainer, 
-          // Add spacing below image only on mobile
-          { marginBottom: isMobile ? SPACING.xl : 0 }
-        ]}
-      >
-        <Image 
-          source={{ uri: 'https://avatar.iran.liara.run/public/boy' }} 
-          style={[
-            styles.profileImage, 
-            { 
-              width: isMobile ? SIZES.heroImageMobile : SIZES.heroImageWeb,
-              height: isMobile ? SIZES.heroImageMobile : SIZES.heroImageWeb,
-              borderRadius: isMobile ? (SIZES.heroImageMobile / 2) : (SIZES.heroImageWeb / 2) 
-            }
-          ]}
-          resizeMode="cover"
-        />
+      {/* Profile Image Area */}
+      <View style={[styles.imageContainer, { marginBottom: isMobile ? SPACING.xl : 0 }]}>
+        <FadeInView delay={200} animationType="zoomIn">
+          <Image 
+            source={profilePic} 
+            style={[
+              styles.profileImage, 
+              { 
+                width: isMobile ? SIZES.heroImageMobile : SIZES.heroImageWeb,
+                height: isMobile ? SIZES.heroImageMobile : SIZES.heroImageWeb,
+                borderRadius: isMobile ? (SIZES.heroImageMobile / 2) : (SIZES.heroImageWeb / 2) 
+              }
+            ]}
+            resizeMode="cover"
+          />
+        </FadeInView>
       </View>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  heroContainer: {
-    width: '100%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: SPACING.xxl,
+  // Added extra top margin to push content below the fixed navbar
+  heroContainer: { 
+    width: '100%', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginTop: SIZES.navHeight + SPACING.xxl 
   },
-  textContent: {
-    flex: 1, // Takes available space
-    justifyContent: 'center',
-  },
-  greetingText: {
-    color: COLORS.primary,
-    fontSize: SIZES.title,
-    fontWeight: FONTS.weightNormal,
-    marginBottom: SPACING.xs,
-  },
-  nameText: {
-    color: COLORS.textPrimary,
-    fontWeight: FONTS.weightBold,
-    marginBottom: SPACING.md,
-  },
-  descriptionText: {
-    color: COLORS.textSecondary,
-    fontSize: SIZES.body,
-    lineHeight: 24, // Makes paragraph more readable
-    marginBottom: SPACING.xl,
-    maxWidth: 500, // Prevents text from stretching too far on large screens
-  },
-  primaryButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: SIZES.borderRadius,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color: COLORS.background, // Dark text on light blue button
-    fontSize: SIZES.body,
-    fontWeight: FONTS.weightBold,
-  },
-  imageContainer: {
-    flex: 1, // Takes available space
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  profileImage: {
-    backgroundColor: COLORS.surface, // Fallback color before image loads
-    borderWidth: 4,
-    borderColor: COLORS.surface,
-  }
+  textContent: { flex: 1, justifyContent: 'center' },
+  greetingText: { color: COLORS.primary, fontSize: SIZES.title, fontWeight: FONTS.weightNormal, marginBottom: SPACING.xs },
+  nameText: { color: COLORS.textPrimary, fontWeight: FONTS.weightBold, marginBottom: SPACING.md },
+  descriptionText: { color: COLORS.textSecondary, fontSize: SIZES.body, lineHeight: 24, marginBottom: SPACING.xl, maxWidth: 500 },
+  buttonsContainer: { width: '100%', alignItems: 'center', justifyContent: 'flex-start', marginTop: SPACING.sm },
+  btnWrapper: { minWidth: 160 }, 
+  imageContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  profileImage: { backgroundColor: COLORS.surface, borderWidth: 4, borderColor: COLORS.surface }
 });
