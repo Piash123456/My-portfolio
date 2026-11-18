@@ -3,29 +3,27 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions, TouchableOpacity, Animated } from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS, ANIMATIONS } from '../theme/theme';
 
-// ADDED: 'Contact' is now part of the navigation menu
 const NAV_ITEMS = ['Home', 'About', 'Skills', 'Projects', 'Contact'];
 
-export default function Navbar({ scrollToSection }) {
+// We directly use the activeSection prop passed from the parent (App.jsx)
+// This avoids the "cascading renders" warning caused by syncing props to local state via useEffect.
+export default function Navbar({ scrollToSection, activeSection = 'Home' }) {
   const { width } = useWindowDimensions();
   const isMobile = width < BREAKPOINTS.tablet;
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  // Animation states are kept stable
   const [menuOpacity] = useState(() => new Animated.Value(0));
   const [menuTranslateY] = useState(() => new Animated.Value(-20));
 
+  // Function to handle opening and closing the mobile menu with smooth animations
   const toggleMobileMenu = () => {
     if (isMenuOpen) {
-      // Animate out (close)
       setIsMenuOpen(false);
       Animated.parallel([
         Animated.timing(menuOpacity, { toValue: 0, duration: 200, useNativeDriver: false }),
         Animated.timing(menuTranslateY, { toValue: -20, duration: 200, useNativeDriver: false })
       ]).start();
     } else {
-      // Animate in (open)
       setIsMenuOpen(true);
       Animated.parallel([
         Animated.timing(menuOpacity, { toValue: 1, duration: 250, useNativeDriver: false }),
@@ -34,10 +32,12 @@ export default function Navbar({ scrollToSection }) {
     }
   };
 
+  // Function to handle navigation clicks
   const handleNavigation = (section) => {
+    // The parent component (App.jsx) is now fully responsible for updating the active state
     scrollToSection(section);
     
-    // Automatically close the mobile menu after clicking a link
+    // Close the mobile menu automatically after clicking a link
     if (isMobile && isMenuOpen) {
       toggleMobileMenu();
     }
@@ -47,23 +47,31 @@ export default function Navbar({ scrollToSection }) {
     <View style={styles.navContainer}>
       <View style={[styles.navInner, { paddingHorizontal: isMobile ? SPACING.md : SPACING.xxl }]}>
         
-        {/* Brand Logo/Text */}
+        {/* Brand Logo "SP" */}
         <TouchableOpacity onPress={() => handleNavigation('Home')}>
-          <Text style={styles.brandText}>MyPortfolio</Text>
+          <Text style={styles.brandText}>SP</Text>
         </TouchableOpacity>
 
         {/* Desktop Navigation Links */}
         {!isMobile ? (
           <View style={styles.navLinks}>
-            {NAV_ITEMS.map((item) => (
-              <TouchableOpacity 
-                key={item}
-                style={styles.linkButton}
-                onPress={() => handleNavigation(item)}
-              >
-                <Text style={styles.linkText}>{item}</Text>
-              </TouchableOpacity>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              // Check if this specific item matches the currently active section
+              const isActive = activeSection === item;
+              
+              return (
+                <TouchableOpacity 
+                  key={item}
+                  style={styles.linkButton}
+                  onPress={() => handleNavigation(item)}
+                >
+                  <Text style={[styles.linkText, isActive && styles.activeLinkText]}>
+                    {/* Display "Expertise" visually, but keep logic as "Skills" */}
+                    {item === 'Skills' ? 'Expertise' : item}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         ) : (
           /* Mobile Menu Toggle Button */
@@ -78,7 +86,7 @@ export default function Navbar({ scrollToSection }) {
         )}
       </View>
 
-      {/* Mobile Dropdown Menu rendered dynamically based on state */}
+      {/* Mobile Dropdown Menu */}
       {isMobile && (
         <Animated.View 
           pointerEvents={isMenuOpen ? 'auto' : 'none'} 
@@ -90,15 +98,22 @@ export default function Navbar({ scrollToSection }) {
             }
           ]}
         >
-          {NAV_ITEMS.map((item) => (
-            <TouchableOpacity 
-              key={item}
-              style={styles.mobileDropdownItem}
-              onPress={() => handleNavigation(item)}
-            >
-              <Text style={styles.mobileDropdownText}>{item}</Text>
-            </TouchableOpacity>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            // Check if this specific item matches the currently active section for the mobile menu
+            const isActive = activeSection === item;
+            
+            return (
+              <TouchableOpacity 
+                key={item}
+                style={styles.mobileDropdownItem}
+                onPress={() => handleNavigation(item)}
+              >
+                <Text style={[styles.mobileDropdownText, isActive && styles.activeLinkText]}>
+                   {item === 'Skills' ? 'Expertise' : item}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </Animated.View>
       )}
     </View>
@@ -116,10 +131,17 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'space-between', height: '100%',
     backgroundColor: COLORS.surface, zIndex: 101, 
   },
-  brandText: { color: COLORS.primary, fontSize: SIZES.title, fontWeight: FONTS.weightBold },
+  
+  // "SP" Logo Style
+  brandText: { color: COLORS.primary, fontSize: SIZES.title + 4, fontWeight: '900', letterSpacing: 1 },
+  
   navLinks: { flexDirection: 'row' },
-  linkButton: { padding: SPACING.sm, marginLeft: SPACING.md },
+  linkButton: { padding: SPACING.sm, marginLeft: SPACING.lg },
   linkText: { color: COLORS.textPrimary, fontSize: SIZES.body, fontWeight: FONTS.weightBold },
+  
+  // Highlight color (Skyblue from Theme) applied to the active page link
+  activeLinkText: { color: COLORS.primary }, 
+
   menuButton: {
     paddingVertical: SPACING.xs, paddingHorizontal: SPACING.md,
     backgroundColor: COLORS.background, borderRadius: SIZES.borderRadius,
@@ -128,6 +150,7 @@ const styles = StyleSheet.create({
   menuButtonActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   menuText: { color: COLORS.textPrimary, fontSize: SIZES.body, fontWeight: FONTS.weightBold },
   menuTextActive: { color: COLORS.background },
+  
   mobileDropdown: {
     position: 'absolute', top: SIZES.navHeight, left: 0, width: '100%',
     backgroundColor: COLORS.surface, borderBottomWidth: SIZES.borderWidth,

@@ -1,20 +1,63 @@
 // src/components/Projects.jsx
 import { useState } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions, Pressable, Animated, Platform, Linking } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions, Pressable, Animated, Platform, Linking, Image } from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS, ANIMATIONS } from '../theme/theme';
 import FadeInView from './FadeInView';
 import PremiumButton from './PremiumButton'; 
 
-// Updated with your actual projects and GitHub links
+// Updated with guaranteed working, highly relevant images
 const PROJECT_DATA = [
-  { id: 1, title: 'Speakup', description: 'A mobile application built with Flutter featuring smooth UI.', tags: ['Flutter', 'Dart'], github: 'https://github.com/Piash123456/Speakup' },
-  { id: 2, title: 'LinkUp', description: 'Social media web app featuring mutual friend filters and custom notifications.', tags: ['React Native Web', 'Vite', 'Firebase'], github: 'https://github.com/Piash123456/LinkUp-social-app' },
-  { id: 3, title: 'Weather App', description: 'Weather app using Riverpod, Geolocator for auto-tracking, and OpenWeather API.', tags: ['Flutter', 'Riverpod'], github: 'https://github.com/Piash123456/weather-app-flutter' },
-  { id: 4, title: 'ML Predictor', description: 'Final-year research on university student dropout prediction using XGBoost and LSTM.', tags: ['Python', 'Machine Learning'], github: 'https://github.com/Piash123456' },
-  { id: 5, title: 'blueWear Store', description: 'E-commerce platform with custom Firestore security rules and guest checkout.', tags: ['React', 'Firestore'], github: 'https://github.com/Piash123456' },
-  { id: 6, title: 'Secret Word', description: 'Multiplayer mobile game utilizing feature-first clean architecture.', tags: ['Flutter', 'Firebase'], github: 'https://github.com/Piash123456' }
+  { 
+    id: 1, 
+    title: 'SpeakUp', 
+    description: 'A real-time mobile chat application built with Flutter featuring a smooth and responsive UI.', 
+    tags: ['Flutter', 'Dart', 'Firebase'], 
+    github: 'https://github.com/Piash123456/Speakup-Chatapp',
+    image: 'https://images.unsplash.com/photo-1526498460520-4c246339dccb?w=600&q=80' // Mobile App / UI Theme
+  },
+  { 
+    id: 2, 
+    title: 'LinkUp', 
+    description: 'Social media web app featuring mutual friend filters, custom notification management, and restricted feed visibility.', 
+    tags: ['React Native Web', 'Vite', 'Firebase'], 
+    github: 'https://github.com/Piash123456/React-native-site-practise',
+    image: 'https://images.unsplash.com/photo-1516251193007-45ef944ab0c6?w=600&q=80' // Connection / Network Theme
+  },
+  { 
+    id: 3, 
+    title: 'LifeOS', 
+    description: 'A comprehensive lifestyle and productivity management application aimed at organizing daily routines and tasks.', 
+    tags: ['React Native', 'Mobile Dev'], 
+    github: 'https://github.com/Piash123456/LifeOS',
+    image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=600&q=80' // Productivity / Notes Theme
+  },
+  { 
+    id: 4, 
+    title: 'blueWear Store', 
+    description: 'E-commerce platform incorporating custom Firestore security rules, cart constraints, and guest checkout options.', 
+    tags: ['React', 'Firestore'], 
+    github: 'https://github.com/Piash123456/ecommerce-web-clothing-store',
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80' // Clothing / Store Theme (Worked fine)
+  },
+  { 
+    id: 5, 
+    title: 'Weather App', 
+    description: 'Weather application utilizing Riverpod for state management, Geolocator for auto-tracking, and OpenWeather API.', 
+    tags: ['Flutter', 'Riverpod', 'API'], 
+    github: 'https://github.com/Piash123456/weather-app-flutter',
+    image: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=600&q=80' // Weather / Clouds Theme
+  },
+  { 
+    id: 6, 
+    title: 'Dropout Predictor', 
+    description: 'Academic research on student dropout prediction using machine learning classifiers (XGBoost, LSTM) and SHAP explainability.', 
+    tags: ['Python', 'Machine Learning'], 
+    github: 'https://github.com/Piash123456/Student-Dropout-Prediction',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80' // Dashboard / Analytics Theme (Worked fine)
+  }
 ];
 
+// Safe Hover Wrapper for Project Cards
 const HoverCard = ({ children, style }) => {
   const [hoverAnim] = useState(() => new Animated.Value(0)); 
 
@@ -54,6 +97,14 @@ export default function Projects() {
     return '48%'; 
   };
 
+  const openGitHubLink = (url) => {
+    if (Platform.OS === 'web') {
+      window.open(url, '_blank');
+    } else {
+      Linking.openURL(url);
+    }
+  };
+
   return (
     <View style={[styles.fullScreenWrapper, { minHeight: height }]}>
       <View style={styles.sectionContainer}>
@@ -71,26 +122,36 @@ export default function Projects() {
               style={{ width: getCardWidth(), marginBottom: SPACING.lg }}
             >
               <HoverCard style={styles.cardOuter}>
-                <Text style={styles.cardTitle}>{project.title}</Text>
-                <Text style={styles.cardDescription}>{project.description}</Text>
                 
-                <View style={styles.tagsContainer}>
-                  {project.tags.map((tag, idx) => (
-                    <View key={idx} style={styles.tagBadge}>
-                      <Text style={styles.tagText}>{tag}</Text>
-                    </View>
-                  ))}
+                {/* Project Image */}
+                <Image 
+                  source={{ uri: project.image }} 
+                  style={styles.cardImage}
+                  resizeMode="cover"
+                />
+
+                {/* Project Content */}
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>{project.title}</Text>
+                  <Text style={styles.cardDescription}>{project.description}</Text>
+                  
+                  <View style={styles.tagsContainer}>
+                    {project.tags.map((tag, idx) => (
+                      <View key={idx} style={styles.tagBadge}>
+                        <Text style={styles.tagText}>{tag}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  <View style={styles.cardActions}>
+                    <PremiumButton 
+                      title="View Source" 
+                      variant="secondary"
+                      onPress={() => openGitHubLink(project.github)}
+                    />
+                  </View>
                 </View>
 
-                <View style={styles.cardActions}>
-                  {/* Opens GitHub link directly in a new tab */}
-                  <PremiumButton 
-                    title="View Source" 
-                    variant="secondary"
-                    onPress={() => Linking.openURL(project.github)}
-                    style={{ padding: SPACING.sm, width: '100%' }}
-                  />
-                </View>
               </HoverCard>
             </FadeInView>
           ))}
@@ -109,12 +170,33 @@ const styles = StyleSheet.create({
   sectionContainer: { width: '100%', marginBottom: SPACING.xxl },
   sectionTitle: { color: COLORS.textPrimary, fontWeight: FONTS.weightBold, marginBottom: SPACING.xl, textAlign: 'center' },
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '100%' },
-  cardOuter: { borderRadius: SIZES.borderRadius, borderWidth: SIZES.borderWidth, backgroundColor: COLORS.surface, ...SHADOWS.card },
-  cardInner: { padding: SPACING.lg, height: '100%' },
+  
+  cardOuter: { 
+    borderRadius: SIZES.borderRadius, 
+    borderWidth: SIZES.borderWidth, 
+    backgroundColor: COLORS.surface, 
+    ...SHADOWS.card, 
+    width: '100%',
+    overflow: 'hidden' 
+  },
+  cardInner: { 
+    height: '100%', 
+    width: '100%' 
+  },
+  cardImage: {
+    width: '100%',
+    height: 180, 
+    backgroundColor: COLORS.border,
+  },
+  cardContent: {
+    padding: SPACING.lg,
+    flex: 1, 
+  },
+  
   cardTitle: { color: COLORS.textPrimary, fontSize: SIZES.title, fontWeight: FONTS.weightBold, marginBottom: SPACING.sm },
   cardDescription: { color: COLORS.textSecondary, fontSize: SIZES.body, lineHeight: 22, marginBottom: SPACING.md },
   tagsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: SPACING.md },
   tagBadge: { backgroundColor: COLORS.background, paddingVertical: SPACING.xs, paddingHorizontal: SPACING.sm, borderRadius: SIZES.borderRadius, marginRight: SPACING.sm, marginBottom: SPACING.sm, borderWidth: SIZES.borderWidth, borderColor: COLORS.border },
   tagText: { color: COLORS.primary, fontSize: SIZES.body - 2 },
-  cardActions: { flexDirection: 'row', marginTop: 'auto', paddingTop: SPACING.md },
+  cardActions: { flexDirection: 'row', marginTop: 'auto', paddingTop: SPACING.md, width: '100%' },
 });
