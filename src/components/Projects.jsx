@@ -1,11 +1,11 @@
-// src/components/Projects.jsx
+
 import { useState } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions, Pressable, Animated, Platform, Linking, Image } from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS, ANIMATIONS } from '../theme/theme';
 import FadeInView from './FadeInView';
 import PremiumButton from './PremiumButton'; 
 
-// Updated with guaranteed working, highly relevant images
+// Project data with GitHub links and theme-matched images
 const PROJECT_DATA = [
   { 
     id: 1, 
@@ -13,7 +13,7 @@ const PROJECT_DATA = [
     description: 'A real-time mobile chat application built with Flutter featuring a smooth and responsive UI.', 
     tags: ['Flutter', 'Dart', 'Firebase'], 
     github: 'https://github.com/Piash123456/Speakup-Chatapp',
-    image: 'https://images.unsplash.com/photo-1526498460520-4c246339dccb?w=600&q=80' // Mobile App / UI Theme
+    image: 'https://images.unsplash.com/photo-1526498460520-4c246339dccb?w=600&q=80'
   },
   { 
     id: 2, 
@@ -21,7 +21,7 @@ const PROJECT_DATA = [
     description: 'Social media web app featuring mutual friend filters, custom notification management, and restricted feed visibility.', 
     tags: ['React Native Web', 'Vite', 'Firebase'], 
     github: 'https://github.com/Piash123456/React-native-site-practise',
-    image: 'https://images.unsplash.com/photo-1516251193007-45ef944ab0c6?w=600&q=80' // Connection / Network Theme
+    image: 'https://images.unsplash.com/photo-1516251193007-45ef944ab0c6?w=600&q=80'
   },
   { 
     id: 3, 
@@ -29,7 +29,7 @@ const PROJECT_DATA = [
     description: 'A comprehensive lifestyle and productivity management application aimed at organizing daily routines and tasks.', 
     tags: ['React Native', 'Mobile Dev'], 
     github: 'https://github.com/Piash123456/LifeOS',
-    image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=600&q=80' // Productivity / Notes Theme
+    image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=600&q=80'
   },
   { 
     id: 4, 
@@ -37,7 +37,7 @@ const PROJECT_DATA = [
     description: 'E-commerce platform incorporating custom Firestore security rules, cart constraints, and guest checkout options.', 
     tags: ['React', 'Firestore'], 
     github: 'https://github.com/Piash123456/ecommerce-web-clothing-store',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80' // Clothing / Store Theme (Worked fine)
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80'
   },
   { 
     id: 5, 
@@ -45,7 +45,7 @@ const PROJECT_DATA = [
     description: 'Weather application utilizing Riverpod for state management, Geolocator for auto-tracking, and OpenWeather API.', 
     tags: ['Flutter', 'Riverpod', 'API'], 
     github: 'https://github.com/Piash123456/weather-app-flutter',
-    image: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=600&q=80' // Weather / Clouds Theme
+    image: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=600&q=80'
   },
   { 
     id: 6, 
@@ -53,11 +53,11 @@ const PROJECT_DATA = [
     description: 'Academic research on student dropout prediction using machine learning classifiers (XGBoost, LSTM) and SHAP explainability.', 
     tags: ['Python', 'Machine Learning'], 
     github: 'https://github.com/Piash123456/Student-Dropout-Prediction',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80' // Dashboard / Analytics Theme (Worked fine)
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80'
   }
 ];
 
-// Safe Hover Wrapper for Project Cards
+// Safe hover wrapper for project cards
 const HoverCard = ({ children, style }) => {
   const [hoverAnim] = useState(() => new Animated.Value(0)); 
 
@@ -97,6 +97,7 @@ export default function Projects() {
     return '48%'; 
   };
 
+  // Opens external GitHub repository links in a new tab on web
   const openGitHubLink = (url) => {
     if (Platform.OS === 'web') {
       window.open(url, '_blank');
@@ -119,28 +120,30 @@ export default function Projects() {
             <FadeInView 
               key={project.id} 
               delay={300 + (index * 150)} 
-              style={{ width: getCardWidth(), marginBottom: SPACING.lg }}
+              style={[styles.cardWrapper, { width: getCardWidth() }]}
             >
               <HoverCard style={styles.cardOuter}>
                 
-                {/* Project Image */}
+                {/* Project thumbnail image */}
                 <Image 
                   source={{ uri: project.image }} 
                   style={styles.cardImage}
                   resizeMode="cover"
                 />
 
-                {/* Project Content */}
+                {/* Project content container with space-between to align buttons at the bottom */}
                 <View style={styles.cardContent}>
-                  <Text style={styles.cardTitle}>{project.title}</Text>
-                  <Text style={styles.cardDescription}>{project.description}</Text>
-                  
-                  <View style={styles.tagsContainer}>
-                    {project.tags.map((tag, idx) => (
-                      <View key={idx} style={styles.tagBadge}>
-                        <Text style={styles.tagText}>{tag}</Text>
-                      </View>
-                    ))}
+                  <View>
+                    <Text style={styles.cardTitle}>{project.title}</Text>
+                    <Text style={styles.cardDescription}>{project.description}</Text>
+                    
+                    <View style={styles.tagsContainer}>
+                      {project.tags.map((tag, idx) => (
+                        <View key={idx} style={styles.tagBadge}>
+                          <Text style={styles.tagText}>{tag}</Text>
+                        </View>
+                      ))}
+                    </View>
                   </View>
 
                   <View style={styles.cardActions}>
@@ -165,13 +168,25 @@ const styles = StyleSheet.create({
   fullScreenWrapper: {
     width: '100%',
     justifyContent: 'center',
-    paddingTop: SIZES.navHeight,
+    paddingTop: SIZES.navHeight + SPACING.lg,
   },
   sectionContainer: { width: '100%', marginBottom: SPACING.xxl },
   sectionTitle: { color: COLORS.textPrimary, fontWeight: FONTS.weightBold, marginBottom: SPACING.xl, textAlign: 'center' },
-  gridContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '100%' },
   
+  // alignItems: 'stretch' forces all cards in a row to match the tallest card's height
+  gridContainer: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'space-between', 
+    alignItems: 'stretch',
+    width: '100%' 
+  },
+  cardWrapper: {
+    marginBottom: SPACING.lg,
+    alignSelf: 'stretch',
+  },
   cardOuter: { 
+    flex: 1,
     borderRadius: SIZES.borderRadius, 
     borderWidth: SIZES.borderWidth, 
     backgroundColor: COLORS.surface, 
@@ -180,8 +195,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden' 
   },
   cardInner: { 
-    height: '100%', 
-    width: '100%' 
+    flex: 1,
+    width: '100%',
+    flexDirection: 'column',
   },
   cardImage: {
     width: '100%',
@@ -191,6 +207,7 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: SPACING.lg,
     flex: 1, 
+    justifyContent: 'space-between',
   },
   
   cardTitle: { color: COLORS.textPrimary, fontSize: SIZES.title, fontWeight: FONTS.weightBold, marginBottom: SPACING.sm },
@@ -198,5 +215,5 @@ const styles = StyleSheet.create({
   tagsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: SPACING.md },
   tagBadge: { backgroundColor: COLORS.background, paddingVertical: SPACING.xs, paddingHorizontal: SPACING.sm, borderRadius: SIZES.borderRadius, marginRight: SPACING.sm, marginBottom: SPACING.sm, borderWidth: SIZES.borderWidth, borderColor: COLORS.border },
   tagText: { color: COLORS.primary, fontSize: SIZES.body - 2 },
-  cardActions: { flexDirection: 'row', marginTop: 'auto', paddingTop: SPACING.md, width: '100%' },
+  cardActions: { flexDirection: 'row', paddingTop: SPACING.md, width: '100%' },
 });
