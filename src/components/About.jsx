@@ -1,9 +1,16 @@
 
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  useWindowDimensions,
+  Pressable,
+  Platform,
+} from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS } from '../theme/theme';
 import FadeInView from './FadeInView';
 
-// Lightweight inline SVG icons (no external icon library required)
+// Lightweight inline SVG icons for Quick Facts items (no external icon library required)
 const FactIcon = ({ type, color }) => {
   const props = {
     width: 18,
@@ -28,7 +35,16 @@ const FactIcon = ({ type, color }) => {
       return (
         <svg {...props}>
           <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
-          <path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01" />
+          <path d="M9 22v-4h6v4" />
+          <path d="M8 6h.01" />
+          <path d="M16 6h.01" />
+          <path d="M12 6h.01" />
+          <path d="M12 10h.01" />
+          <path d="M12 14h.01" />
+          <path d="M16 10h.01" />
+          <path d="M16 14h.01" />
+          <path d="M8 10h.01" />
+          <path d="M8 14h.01" />
         </svg>
       );
     case 'specialization':
@@ -57,7 +73,7 @@ const FactIcon = ({ type, color }) => {
   }
 };
 
-// Quick facts data displayed in the right-hand info card
+// Structured profile highlights displayed in the Quick Facts card
 const QUICK_FACTS = [
   {
     id: 1,
@@ -96,9 +112,15 @@ export default function About() {
   const isMobile = width < BREAKPOINTS.tablet;
 
   return (
-    <View style={[styles.fullScreenWrapper, { minHeight: height }]}>
+    <View
+      style={[
+        styles.fullScreenWrapper,
+        { minHeight: isMobile ? undefined : height },
+      ]}
+    >
       <View style={styles.sectionContainer}>
-        <FadeInView delay={100}>
+        {/* Section title */}
+        <FadeInView delay={100} style={styles.headerWrapper}>
           <Text
             style={[
               styles.sectionTitle,
@@ -107,6 +129,7 @@ export default function About() {
           >
             About Me
           </Text>
+          <View style={styles.titleAccentLine} />
         </FadeInView>
 
         <View
@@ -115,9 +138,9 @@ export default function About() {
             { flexDirection: isMobile ? 'column' : 'row' },
           ]}
         >
-          {/* Left column: biography paragraphs */}
+          {/* Left column: personal bio and academic focus */}
           <FadeInView
-            delay={250}
+            delay={200}
             style={[
               styles.bioColumn,
               {
@@ -136,8 +159,8 @@ export default function About() {
 
             <Text style={styles.paragraph}>
               I&apos;m passionate about building modern, responsive, and
-              user-friendly applications. My primary interests include mobile and
-              web development, with hands-on experience in{' '}
+              user-friendly applications. My primary interests include mobile
+              and web development, with hands-on experience in{' '}
               <Text style={styles.highlight}>Flutter</Text> and{' '}
               <Text style={styles.highlight}>React Native</Text>.
             </Text>
@@ -151,52 +174,68 @@ export default function About() {
               <Text style={styles.highlight}>Student Dropout Prediction</Text>.
             </Text>
 
-            <Text style={[styles.paragraph, styles.lastParagraph]}>
+            <Text style={styles.paragraphLast}>
               My goal is to grow as a Software Developer, continuously improve
               my technical skills, and build impactful digital solutions.
             </Text>
           </FadeInView>
 
-          {/* Right column: quick facts card */}
+          {/* Right column: interactive Quick Facts card */}
           <FadeInView
-            delay={400}
+            delay={320}
             style={[
               styles.factsColumn,
               { width: isMobile ? '100%' : '42%' },
             ]}
           >
-            <View style={styles.factsCard}>
+            <Pressable
+              style={({ hovered }) => [
+                styles.factsCard,
+                hovered && styles.factsCardHovered,
+              ]}
+            >
               <Text style={styles.factsTitle}>Quick Facts</Text>
 
-              {QUICK_FACTS.map((fact, index) => {
-                const isLast = index === QUICK_FACTS.length - 1;
-
-                return (
-                  <View
+              <View style={styles.factsList}>
+                {QUICK_FACTS.map((fact) => (
+                  <Pressable
                     key={fact.id}
-                    style={[
+                    style={({ hovered }) => [
                       styles.factItem,
-                      isLast && styles.factItemLast,
+                      hovered && styles.factItemHovered,
                     ]}
                   >
-                    <View style={styles.iconCircle}>
-                      <FactIcon type={fact.type} color={COLORS.primary} />
-                    </View>
-
-                    <View style={styles.factTextContainer}>
-                      <Text style={styles.factLabel}>{fact.label}</Text>
-                      <Text style={styles.factValue}>{fact.value}</Text>
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
+                    {({ hovered }) => (
+                      <>
+                        <View
+                          style={[
+                            styles.factIconBox,
+                            hovered && styles.factIconBoxHovered,
+                          ]}
+                        >
+                          <FactIcon type={fact.type} color={COLORS.primary} />
+                        </View>
+                        <View style={styles.factTextGroup}>
+                          <Text style={styles.factLabel}>{fact.label}</Text>
+                          <Text style={styles.factValue}>{fact.value}</Text>
+                        </View>
+                      </>
+                    )}
+                  </Pressable>
+                ))}
+              </View>
+            </Pressable>
           </FadeInView>
         </View>
       </View>
     </View>
   );
 }
+
+const webTransition =
+  Platform.OS === 'web'
+    ? { transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)' }
+    : {};
 
 const styles = StyleSheet.create({
   fullScreenWrapper: {
@@ -208,11 +247,21 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: SPACING.xxl,
   },
+  headerWrapper: {
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
+  },
   sectionTitle: {
     color: COLORS.textPrimary,
     fontWeight: FONTS.weightBold,
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.xs + 2,
     textAlign: 'center',
+  },
+  titleAccentLine: {
+    width: 64,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: COLORS.primary,
   },
   contentRow: {
     width: '100%',
@@ -224,69 +273,93 @@ const styles = StyleSheet.create({
   },
   paragraph: {
     color: COLORS.textSecondary,
-    fontSize: SIZES.body + 1,
-    lineHeight: 28,
-    marginBottom: SPACING.lg,
+    fontSize: SIZES.body,
+    lineHeight: 26,
+    marginBottom: SPACING.md + 2,
   },
-  lastParagraph: {
-    marginBottom: 0,
+  paragraphLast: {
+    color: COLORS.textSecondary,
+    fontSize: SIZES.body,
+    lineHeight: 26,
   },
   highlight: {
     color: COLORS.primary,
     fontWeight: FONTS.weightBold,
   },
   factsColumn: {
-    alignSelf: 'stretch',
     justifyContent: 'center',
   },
   factsCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: SIZES.borderRadius,
+    borderRadius: SIZES.borderRadius + 2,
     borderWidth: SIZES.borderWidth,
-    borderColor: COLORS.primary,
+    borderColor: COLORS.border,
     padding: SPACING.xl,
     ...SHADOWS.card,
+    ...webTransition,
+  },
+  factsCardHovered: {
+    borderColor: COLORS.primary,
+    transform: [{ translateY: -4 }],
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 14px 30px -10px rgba(56, 189, 248, 0.28)' }
+      : {}),
   },
   factsTitle: {
     color: COLORS.primary,
     fontSize: SIZES.title + 2,
     fontWeight: FONTS.weightBold,
     textAlign: 'center',
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
+  },
+  factsList: {
+    gap: SPACING.xs + 2,
   },
   factItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.lg,
+    paddingVertical: SPACING.xs + 4,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: SIZES.borderRadius,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    ...webTransition,
+    ...(Platform.OS === 'web' ? { cursor: 'default' } : {}),
   },
-  factItemLast: {
-    marginBottom: 0,
+  factItemHovered: {
+    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+    borderColor: 'rgba(56, 189, 248, 0.22)',
+    transform: [{ translateX: 5 }],
   },
-  iconCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: COLORS.background,
-    borderWidth: SIZES.borderWidth,
-    borderColor: COLORS.border,
-    justifyContent: 'center',
+  factIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.22)',
     alignItems: 'center',
+    justifyContent: 'center',
     marginRight: SPACING.md,
+    ...webTransition,
   },
-  factTextContainer: {
+  factIconBoxHovered: {
+    backgroundColor: 'rgba(56, 189, 248, 0.18)',
+    borderColor: COLORS.primary,
+  },
+  factTextGroup: {
     flex: 1,
   },
   factLabel: {
     color: COLORS.textSecondary,
-    fontSize: SIZES.body - 3,
+    fontSize: SIZES.body - 4,
     fontWeight: FONTS.weightBold,
-    letterSpacing: 1,
+    letterSpacing: 0.8,
     marginBottom: 2,
   },
   factValue: {
     color: COLORS.textPrimary,
-    fontSize: SIZES.body,
+    fontSize: SIZES.body - 1,
     fontWeight: FONTS.weightBold,
-    lineHeight: 20,
   },
 });

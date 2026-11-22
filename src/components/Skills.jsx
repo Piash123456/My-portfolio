@@ -1,182 +1,310 @@
 
-import { useState } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions, Pressable, Animated, Platform, Image } from 'react-native';
-import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS, ANIMATIONS } from '../theme/theme';
+import {
+  View,
+  Text,
+  StyleSheet,
+  useWindowDimensions,
+  Pressable,
+  Platform,
+} from 'react-native';
+import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS } from '../theme/theme';
 import FadeInView from './FadeInView';
 
-// High-Quality URL-Encoded SVG Icons
-const ICONS = {
-  languages: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2338BDF8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%2216%2018%2022%2012%2016%206%22%3E%3C%2Fpolyline%3E%3Cpolyline%20points%3D%228%206%202%2012%208%2018%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E',
-  frameworks: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2338BDF8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%222%22%20ry%3D%222%22%3E%3C%2Frect%3E%3Cline%20x1%3D%223%22%20y1%3D%229%22%20x2%3D%2221%22%20y2%3D%229%22%3E%3C%2Fline%3E%3Cline%20x1%3D%229%22%20y1%3D%2221%22%20x2%3D%229%22%20y2%3D%229%22%3E%3C%2Fline%3E%3C%2Fsvg%3E',
-  backend: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2338BDF8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cellipse%20cx%3D%2212%22%20cy%3D%225%22%20rx%3D%229%22%20ry%3D%223%22%3E%3C%2Fellipse%3E%3Cpath%20d%3D%22M21%2012c0%201.66-4%203-9%203s-9-1.34-9-3%22%3E%3C%2Fpath%3E%3Cpath%20d%3D%22M3%205v14c0%201.66%204%203%209%203s9-1.34%209-3V5%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E'
+// Lightweight inline SVG icons for each skill category
+const CategoryIcon = ({ type, color }) => {
+  const props = {
+    width: 20,
+    height: 20,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: color,
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  };
+
+  switch (type) {
+    case 'mobile':
+      return (
+        <svg {...props}>
+          <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+          <path d="M12 18h.01" />
+        </svg>
+      );
+    case 'web':
+      return (
+        <svg {...props}>
+          <polyline points="16 18 22 12 16 6" />
+          <polyline points="8 6 2 12 8 18" />
+        </svg>
+      );
+    case 'backend':
+      return (
+        <svg {...props}>
+          <ellipse cx="12" cy="5" rx="9" ry="3" />
+          <path d="M3 5v14a9 3 0 0 0 18 0V5" />
+          <path d="M3 12a9 3 0 0 0 18 0" />
+        </svg>
+      );
+    case 'state':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 3v6" />
+          <path d="M12 15v6" />
+          <path d="m4.2 7.5 5.2 3" />
+          <path d="m14.6 13.5 5.2 3" />
+          <path d="m19.8 7.5-5.2 3" />
+          <path d="m9.4 13.5-5.2 3" />
+        </svg>
+      );
+    case 'tools':
+      return (
+        <svg {...props}>
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+        </svg>
+      );
+    default:
+      return null;
+  }
 };
 
-const SKILLS_DATA = [
+// Categorized technical skills aligned with mobile, web, backend, and tooling stack
+const SKILL_CATEGORIES = [
   {
     id: 1,
-    title: 'Languages',
-    description: 'Writing clean, scalable, and efficient code to build robust logic and algorithms for my cross-platform applications.',
-    icon: ICONS.languages,
-    skills: ['JavaScript', 'Dart', 'Python', 'HTML & CSS'],
+    title: 'Mobile Development',
+    icon: 'mobile',
+    skills: ['Flutter', 'Dart', 'React Native', 'React Native Web', 'Expo'],
   },
   {
     id: 2,
-    title: 'Frameworks',
-    description: 'Crafting highly interactive, beautiful, and consistent user interfaces using modern component-driven tools.',
-    icon: ICONS.frameworks,
-    skills: ['React Native', 'Flutter', 'Expo', 'Vite'],
+    title: 'Web & Frontend',
+    icon: 'web',
+    skills: ['React.js', 'JavaScript', 'TypeScript', 'Vite', 'HTML5', 'CSS3'],
   },
   {
     id: 3,
-    title: 'Tools & Backend',
-    description: 'Architecting secure databases, managing real-time states, and maintaining seamless version control across teams.',
-    icon: ICONS.backend,
-    skills: ['Firebase', 'Git & GitHub', 'Riverpod', 'Firestore', 'Figma'],
-  }
+    title: 'Backend & Cloud',
+    icon: 'backend',
+    skills: ['Firebase Auth', 'Cloud Firestore', 'Realtime Database', 'Supabase', 'REST APIs'],
+  },
+  {
+    id: 4,
+    title: 'State & Networking',
+    icon: 'state',
+    skills: ['Riverpod', 'GoRouter', 'Dio', 'Geolocator', 'Responsive UI'],
+  },
+  {
+    id: 5,
+    title: 'Tools & Deployment',
+    icon: 'tools',
+    skills: ['Git', 'GitHub', 'VS Code', 'Figma', 'Netlify', 'Jupyter Notebook'],
+  },
 ];
-
-const HoverSkillCard = ({ children, style }) => {
-  const [hoverAnim] = useState(() => new Animated.Value(0)); 
-
-  const handleHoverIn = () => Animated.spring(hoverAnim, { toValue: 1, tension: ANIMATIONS.hoverTension, friction: ANIMATIONS.hoverFriction, useNativeDriver: false }).start();
-  const handleHoverOut = () => Animated.spring(hoverAnim, { toValue: 0, tension: ANIMATIONS.hoverTension, friction: ANIMATIONS.hoverFriction, useNativeDriver: false }).start();
-
-  const animatedStyle = {
-    transform: [
-      { translateY: hoverAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -8] }) }, 
-      { scale: hoverAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.02] }) } 
-    ],
-    shadowOpacity: hoverAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.6] }),
-    borderColor: hoverAnim.interpolate({ inputRange: [0, 1], outputRange: [COLORS.border, COLORS.primary] }),
-  };
-
-  return (
-    <Animated.View style={[style, animatedStyle]}>
-      <Pressable 
-        onHoverIn={Platform.OS === 'web' ? handleHoverIn : null} 
-        onHoverOut={Platform.OS === 'web' ? handleHoverOut : null}
-        style={styles.cardInner}
-      >
-        {children}
-      </Pressable>
-    </Animated.View>
-  );
-};
 
 export default function Skills() {
   const { width, height } = useWindowDimensions();
   const isMobile = width < BREAKPOINTS.tablet;
+  const isTablet = width >= BREAKPOINTS.tablet && width < 1024;
 
-  const getCardWidth = () => {
-    if (isMobile) return '100%';
-    return '31%';
-  };
+  // Responsive card width for a balanced 3+2 centered layout on desktop
+  const cardWidth = isMobile ? '100%' : isTablet ? '47%' : '31%';
 
   return (
-    <View style={[styles.fullScreenWrapper, { minHeight: height }]}>
+    <View
+      style={[
+        styles.fullScreenWrapper,
+        { minHeight: isMobile ? undefined : height },
+      ]}
+    >
       <View style={styles.sectionContainer}>
-        
-        {/* Updated Animated Title */}
-        <FadeInView delay={100}>
-          <Text style={[styles.sectionTitle, { fontSize: isMobile ? SIZES.headerMobile : SIZES.headerWeb }]}>
-            My Expertise
+        {/* Section header */}
+        <FadeInView delay={100} style={styles.headerWrapper}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { fontSize: isMobile ? SIZES.headerMobile : SIZES.headerWeb },
+            ]}
+          >
+            Technical Expertise
+          </Text>
+          <View style={styles.titleAccentLine} />
+          <Text style={styles.sectionSubtitle}>
+            Technologies and tools I use to build cross-platform mobile apps and
+            modern, responsive web interfaces.
           </Text>
         </FadeInView>
 
-        <View style={[styles.gridContainer, { flexDirection: isMobile ? 'column' : 'row' }]}>
-          {SKILLS_DATA.map((category, index) => (
-            <FadeInView 
-              key={category.id} 
-              delay={300 + (index * 150)} 
-              style={{ width: getCardWidth(), marginBottom: isMobile ? SPACING.lg : 0 }}
+        {/* Responsive centered grid of animated skill cards */}
+        <View style={styles.gridContainer}>
+          {SKILL_CATEGORIES.map((category, index) => (
+            <FadeInView
+              key={category.id}
+              delay={140 + index * 70}
+              style={[styles.cardWrapper, { width: cardWidth }]}
             >
-              <HoverSkillCard style={styles.cardOuter}>
-                
-                <View style={styles.iconCircle}>
-                  <Image source={{ uri: category.icon }} style={styles.iconImage} resizeMode="contain" />
+              <Pressable
+                style={({ hovered }) => [
+                  styles.card,
+                  hovered && styles.cardHovered,
+                ]}
+              >
+                {/* Card header with icon badge and category title */}
+                <View style={styles.cardHeader}>
+                  <View style={styles.iconBox}>
+                    <CategoryIcon type={category.icon} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.cardTitle}>{category.title}</Text>
                 </View>
 
-                <Text style={styles.cardTitle}>{category.title}</Text>
-                <Text style={styles.cardDescription}>{category.description}</Text>
-                
-                <View style={styles.divider} />
-
-                <View style={styles.skillsWrapper}>
-                  {category.skills.map((skill, idx) => (
-                    <View key={idx} style={styles.skillBadge}>
-                      <Text style={styles.skillText}>{skill}</Text>
-                    </View>
+                {/* Interactive skill badges */}
+                <View style={styles.skillsWrap}>
+                  {category.skills.map((skill) => (
+                    <Pressable
+                      key={skill}
+                      style={({ hovered }) => [
+                        styles.skillPill,
+                        hovered && styles.skillPillHovered,
+                      ]}
+                    >
+                      {({ hovered }) => (
+                        <Text
+                          style={[
+                            styles.skillText,
+                            hovered && styles.skillTextHovered,
+                          ]}
+                        >
+                          {skill}
+                        </Text>
+                      )}
+                    </Pressable>
                   ))}
                 </View>
-
-              </HoverSkillCard>
+              </Pressable>
             </FadeInView>
           ))}
         </View>
-        
       </View>
     </View>
   );
 }
 
+const webTransition =
+  Platform.OS === 'web'
+    ? { transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)' }
+    : {};
+
 const styles = StyleSheet.create({
   fullScreenWrapper: {
     width: '100%',
     justifyContent: 'center',
-    paddingTop: SIZES.navHeight,
+    paddingTop: SIZES.navHeight + SPACING.lg,
   },
-  sectionContainer: { 
-    width: '100%', 
-    marginBottom: SPACING.xxl 
-  },
-  sectionTitle: { 
-    color: COLORS.textPrimary, 
-    fontWeight: FONTS.weightBold, 
-    marginBottom: SPACING.xxl, 
-    textAlign: 'center' 
-  },
-  gridContainer: { 
-    justifyContent: 'space-between', 
-    alignItems: 'stretch',
-    width: '100%' 
-  },
-  cardOuter: { 
-    borderRadius: SIZES.borderRadius * 1.5, 
-    borderWidth: SIZES.borderWidth, 
-    backgroundColor: COLORS.surface, 
-    ...SHADOWS.card, 
+  sectionContainer: {
     width: '100%',
-    height: '100%' 
+    marginBottom: SPACING.xxl,
   },
-  cardInner: { 
-    padding: SPACING.xl, 
-    height: '100%', 
-    width: '100%',
+  headerWrapper: {
     alignItems: 'center',
-    justifyContent: 'flex-start'
+    marginBottom: SPACING.xl,
   },
-  iconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: COLORS.background,
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontWeight: FONTS.weightBold,
+    marginBottom: SPACING.xs + 2,
+    textAlign: 'center',
+  },
+  titleAccentLine: {
+    width: 64,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: COLORS.primary,
+    marginBottom: SPACING.md,
+  },
+  sectionSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: SIZES.body,
+    lineHeight: 24,
+    textAlign: 'center',
+    maxWidth: 600,
+  },
+  gridContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'center',
+    alignItems: 'stretch',
+    gap: SPACING.lg,
+  },
+  cardWrapper: {
+    display: 'flex',
+  },
+  card: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: SIZES.borderRadius + 2,
+    borderWidth: SIZES.borderWidth,
+    borderColor: COLORS.border,
+    padding: SPACING.lg,
+    ...SHADOWS.card,
+    ...webTransition,
+  },
+  cardHovered: {
+    borderColor: COLORS.primary,
+    transform: [{ translateY: -5 }],
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 14px 28px -10px rgba(56, 189, 248, 0.28)' }
+      : {}),
+  },
+  cardHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SPACING.md,
+  },
+  iconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: SIZES.borderRadius,
+    backgroundColor: 'rgba(56, 189, 248, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  cardTitle: {
+    color: COLORS.textPrimary,
+    fontSize: SIZES.title,
+    fontWeight: FONTS.weightBold,
+    flex: 1,
+  },
+  skillsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs + 2,
+  },
+  skillPill: {
+    backgroundColor: COLORS.background,
     borderWidth: 1,
     borderColor: COLORS.border,
+    borderRadius: 8,
+    paddingHorizontal: SPACING.sm + 4,
+    paddingVertical: 6,
+    ...webTransition,
+    ...(Platform.OS === 'web' ? { cursor: 'default' } : {}),
   },
-  iconImage: { width: 28, height: 28 },
-  cardTitle: { 
-    color: COLORS.primary, 
-    fontSize: SIZES.title, 
-    fontWeight: FONTS.weightBold, 
-    marginBottom: SPACING.sm,
-    textAlign: 'center'
+  skillPillHovered: {
+    backgroundColor: 'rgba(56, 189, 248, 0.14)',
+    borderColor: COLORS.primary,
+    transform: [{ translateY: -2 }],
   },
-  cardDescription: { color: COLORS.textSecondary, fontSize: SIZES.body, lineHeight: 22, textAlign: 'center', marginBottom: SPACING.lg },
-  divider: { width: '50%', height: 1, backgroundColor: COLORS.border, marginBottom: SPACING.lg },
-  skillsWrapper: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: SPACING.sm },
-  skillBadge: { backgroundColor: COLORS.background, paddingVertical: SPACING.sm, paddingHorizontal: SPACING.md, borderRadius: SIZES.borderRadius, borderWidth: SIZES.borderWidth, borderColor: COLORS.border },
-  skillText: { color: COLORS.textPrimary, fontSize: SIZES.body - 1, fontWeight: '500' }
+  skillText: {
+    color: COLORS.textSecondary,
+    fontSize: SIZES.body - 2,
+    fontWeight: FONTS.weightBold,
+  },
+  skillTextHovered: {
+    color: COLORS.primary,
+  },
 });

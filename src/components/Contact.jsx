@@ -17,6 +17,14 @@ import FadeInView from './FadeInView';
 const GOOGLE_SCRIPT_URL =
   'https://script.google.com/macros/s/AKfycbzk7giOhvsT0DYKGozxACYNfivZlZFMozg9gczAn3_x0wrFn56-ZHdbQ88CZSXt2FO4jg/exec';
 
+// Dropdown options for inquiry category
+const INQUIRY_OPTIONS = [
+  'Project Inquiry',
+  'Internship / Job Opportunity',
+  'Collaboration',
+  'General Question',
+];
+
 // Lightweight inline SVG icons (no external icon package required)
 const ContactIcon = ({ type, color }) => {
   const props = {
@@ -74,6 +82,18 @@ const ContactIcon = ({ type, color }) => {
           <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
         </svg>
       );
+    case 'chevronDown':
+      return (
+        <svg {...props} width={16} height={16}>
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      );
+    case 'check':
+      return (
+        <svg {...props} width={14} height={14} strokeWidth={3}>
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -116,11 +136,17 @@ export default function Contact() {
   const { width, height } = useWindowDimensions();
   const isMobile = width < BREAKPOINTS.tablet;
 
-  // Form state
+  // Form input states
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [inquiryType, setInquiryType] = useState(INQUIRY_OPTIONS[0]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [agreed, setAgreed] = useState(false);
+
+  // Active focused input field for subtle border glow
+  const [focusedField, setFocusedField] = useState('');
 
   // Submission feedback state
   const [isSending, setIsSending] = useState(false);
@@ -136,7 +162,7 @@ export default function Contact() {
     }
   };
 
-  // Send contact form payload to Google Sheets via Apps Script
+  // Validate and submit contact form payload to Google Sheets via Apps Script
   const handleSendMessage = async () => {
     if (!name.trim() || !email.trim() || !message.trim()) {
       setStatusMessage({
@@ -146,8 +172,20 @@ export default function Contact() {
       return;
     }
 
+    if (!agreed) {
+      setStatusMessage({
+        type: 'error',
+        text: 'Please confirm the checkbox before sending your message.',
+      });
+      return;
+    }
+
     setIsSending(true);
     setStatusMessage({ type: '', text: '' });
+
+    const formattedSubject = subject.trim()
+      ? `[${inquiryType}] ${subject.trim()}`
+      : `[${inquiryType}] Portfolio Inquiry`;
 
     try {
       await fetch(GOOGLE_SCRIPT_URL, {
@@ -159,7 +197,7 @@ export default function Contact() {
         body: JSON.stringify({
           name: name.trim(),
           email: email.trim(),
-          subject: subject.trim() || 'Portfolio Inquiry',
+          subject: formattedSubject,
           message: message.trim(),
         }),
       });
@@ -172,8 +210,10 @@ export default function Contact() {
       // Reset form inputs after successful submission
       setName('');
       setEmail('');
+      setInquiryType(INQUIRY_OPTIONS[0]);
       setSubject('');
       setMessage('');
+      setAgreed(false);
     } catch {
       setStatusMessage({
         type: 'error',
@@ -185,7 +225,12 @@ export default function Contact() {
   };
 
   return (
-    <View style={[styles.fullScreenWrapper, { minHeight: height }]}>
+    <View
+      style={[
+        styles.fullScreenWrapper,
+        { minHeight: isMobile ? undefined : height },
+      ]}
+    >
       <View style={styles.sectionContainer}>
         <View
           style={[
@@ -193,7 +238,7 @@ export default function Contact() {
             { flexDirection: isMobile ? 'column' : 'row' },
           ]}
         >
-          {/* Left column: heading, contact cards, and social icons */}
+          {/* Left column: heading, animated contact cards, and social icons */}
           <FadeInView
             delay={150}
             style={[
@@ -220,35 +265,60 @@ export default function Contact() {
               feel free to reach out!
             </Text>
 
-            {/* Contact info cards */}
+            {/* Interactive contact info cards */}
             <View style={styles.infoList}>
               {CONTACT_INFO.map((item) => (
                 <Pressable
                   key={item.id}
                   onPress={() => openExternalLink(item.href)}
-                  style={styles.infoCard}
+                  style={({ hovered }) => [
+                    styles.infoCard,
+                    hovered && styles.infoCardHovered,
+                    !item.href && Platform.OS === 'web' && { cursor: 'default' },
+                  ]}
                 >
-                  <View style={styles.infoIconBox}>
-                    <ContactIcon type={item.type} color={COLORS.textSecondary} />
-                  </View>
-                  <View>
-                    <Text style={styles.infoLabel}>{item.label}</Text>
-                    <Text style={styles.infoValue}>{item.value}</Text>
-                  </View>
+                  {({ hovered }) => (
+                    <>
+                      <View
+                        style={[
+                          styles.infoIconBox,
+                          hovered && styles.infoIconBoxHovered,
+                        ]}
+                      >
+                        <ContactIcon
+                          type={item.type}
+                          color={hovered ? COLORS.primary : COLORS.textSecondary}
+                        />
+                      </View>
+                      <View>
+                        <Text style={styles.infoLabel}>{item.label}</Text>
+                        <Text style={styles.infoValue}>{item.value}</Text>
+                      </View>
+                    </>
+                  )}
                 </Pressable>
               ))}
             </View>
 
-            {/* Social links */}
+            {/* Animated social links */}
             <Text style={styles.socialHeading}>Follow me on social media</Text>
             <View style={styles.socialRow}>
               {SOCIAL_LINKS.map((social) => (
                 <Pressable
                   key={social.id}
                   onPress={() => openExternalLink(social.url)}
-                  style={styles.socialCircle}
+                  style={({ hovered, pressed }) => [
+                    styles.socialCircle,
+                    hovered && styles.socialCircleHovered,
+                    pressed && styles.buttonPressed,
+                  ]}
                 >
-                  <ContactIcon type={social.type} color={COLORS.primary} />
+                  {({ hovered }) => (
+                    <ContactIcon
+                      type={social.type}
+                      color={hovered ? COLORS.background : COLORS.primary}
+                    />
+                  )}
                 </Pressable>
               ))}
             </View>
@@ -256,13 +326,14 @@ export default function Contact() {
 
           {/* Right column: interactive contact form */}
           <FadeInView
-            delay={300}
+            delay={280}
             style={[
               styles.rightColumn,
               { width: isMobile ? '100%' : '50%' },
             ]}
           >
             <View style={styles.formCard}>
+              {/* Name and Email row */}
               <View
                 style={[
                   styles.inputRow,
@@ -280,52 +351,154 @@ export default function Contact() {
                 >
                   <Text style={styles.inputLabel}>Your Name</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[
+                      styles.input,
+                      focusedField === 'name' && styles.inputFocused,
+                    ]}
                     placeholder="Your Name"
                     placeholderTextColor={COLORS.textSecondary}
                     value={name}
                     onChangeText={setName}
+                    onFocus={() => setFocusedField('name')}
+                    onBlur={() => setFocusedField('')}
                   />
                 </View>
 
                 <View style={[styles.inputGroup, { flex: 1 }]}>
                   <Text style={styles.inputLabel}>Your Email</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[
+                      styles.input,
+                      focusedField === 'email' && styles.inputFocused,
+                    ]}
                     placeholder="your-email@gmail.com"
                     placeholderTextColor={COLORS.textSecondary}
                     keyboardType="email-address"
                     autoCapitalize="none"
                     value={email}
                     onChangeText={setEmail}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField('')}
                   />
                 </View>
               </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Subject</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Project Inquiry"
-                  placeholderTextColor={COLORS.textSecondary}
-                  value={subject}
-                  onChangeText={setSubject}
-                />
+              {/* Inquiry Type dropdown and Subject row */}
+              <View
+                style={[
+                  styles.inputRow,
+                  { flexDirection: isMobile ? 'column' : 'row' },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.inputGroup,
+                    {
+                      flex: 1,
+                      marginRight: isMobile ? 0 : SPACING.md,
+                      zIndex: 10,
+                    },
+                  ]}
+                >
+                  <Text style={styles.inputLabel}>Inquiry Type</Text>
+                  <Pressable
+                    onPress={() => setDropdownOpen((prev) => !prev)}
+                    style={({ hovered }) => [
+                      styles.dropdownTrigger,
+                      (hovered || dropdownOpen) && styles.inputFocused,
+                    ]}
+                  >
+                    <Text style={styles.dropdownText}>{inquiryType}</Text>
+                    <ContactIcon type="chevronDown" color={COLORS.primary} />
+                  </Pressable>
+
+                  {dropdownOpen ? (
+                    <View style={styles.dropdownMenu}>
+                      {INQUIRY_OPTIONS.map((option) => (
+                        <Pressable
+                          key={option}
+                          onPress={() => {
+                            setInquiryType(option);
+                            setDropdownOpen(false);
+                          }}
+                          style={({ hovered }) => [
+                            styles.dropdownItem,
+                            (inquiryType === option || hovered) &&
+                              styles.dropdownItemActive,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.dropdownItemText,
+                              inquiryType === option &&
+                                styles.dropdownItemTextActive,
+                            ]}
+                          >
+                            {option}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  ) : null}
+                </View>
+
+                <View style={[styles.inputGroup, { flex: 1 }]}>
+                  <Text style={styles.inputLabel}>Subject</Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      focusedField === 'subject' && styles.inputFocused,
+                    ]}
+                    placeholder="Brief subject..."
+                    placeholderTextColor={COLORS.textSecondary}
+                    value={subject}
+                    onChangeText={setSubject}
+                    onFocus={() => setFocusedField('subject')}
+                    onBlur={() => setFocusedField('')}
+                  />
+                </View>
               </View>
 
+              {/* Message textarea */}
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Message</Text>
                 <TextInput
-                  style={[styles.input, styles.textArea]}
+                  style={[
+                    styles.input,
+                    styles.textArea,
+                    focusedField === 'message' && styles.inputFocused,
+                  ]}
                   placeholder="Tell me about your project..."
                   placeholderTextColor={COLORS.textSecondary}
                   multiline
-                  numberOfLines={5}
+                  numberOfLines={4}
                   textAlignVertical="top"
                   value={message}
                   onChangeText={setMessage}
+                  onFocus={() => setFocusedField('message')}
+                  onBlur={() => setFocusedField('')}
                 />
               </View>
+
+              {/* Consent checkbox */}
+              <Pressable
+                onPress={() => setAgreed((prev) => !prev)}
+                style={styles.checkboxRow}
+              >
+                <View
+                  style={[
+                    styles.checkboxBox,
+                    agreed && styles.checkboxBoxChecked,
+                  ]}
+                >
+                  {agreed ? (
+                    <ContactIcon type="check" color={COLORS.background} />
+                  ) : null}
+                </View>
+                <Text style={styles.checkboxLabel}>
+                  I agree to be contacted regarding this inquiry.
+                </Text>
+              </Pressable>
 
               {/* Inline status feedback */}
               {statusMessage.text ? (
@@ -350,13 +523,15 @@ export default function Contact() {
                 </View>
               ) : null}
 
+              {/* Animated submit button */}
               <Pressable
                 onPress={handleSendMessage}
                 disabled={isSending}
-                style={({ pressed }) => [
+                style={({ hovered, pressed }) => [
                   styles.submitButton,
+                  hovered && !isSending && styles.submitButtonHovered,
                   isSending && styles.submitButtonDisabled,
-                  pressed && { opacity: 0.85 },
+                  pressed && styles.buttonPressed,
                 ]}
               >
                 <Text style={styles.submitButtonText}>
@@ -370,6 +545,11 @@ export default function Contact() {
     </View>
   );
 }
+
+const webTransition =
+  Platform.OS === 'web'
+    ? { transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)' }
+    : {};
 
 const styles = StyleSheet.create({
   fullScreenWrapper: {
@@ -413,6 +593,15 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     padding: SPACING.md,
     marginBottom: SPACING.md,
+    ...webTransition,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
+  },
+  infoCardHovered: {
+    borderColor: COLORS.primary,
+    transform: [{ translateX: 6 }],
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 10px 24px -10px rgba(56, 189, 248, 0.28)' }
+      : {}),
   },
   infoIconBox: {
     width: 40,
@@ -424,6 +613,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
+    ...webTransition,
+  },
+  infoIconBoxHovered: {
+    borderColor: COLORS.primary,
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
   },
   infoLabel: {
     color: COLORS.textSecondary,
@@ -445,24 +639,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   socialCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: SIZES.borderWidth,
     borderColor: COLORS.primary,
     backgroundColor: COLORS.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
+    ...webTransition,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
+  },
+  socialCircleHovered: {
+    backgroundColor: COLORS.primary,
+    transform: [{ translateY: -4 }],
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 8px 20px -4px rgba(56, 189, 248, 0.55)' }
+      : {}),
   },
   rightColumn: {
     justifyContent: 'center',
   },
   formCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: SIZES.borderRadius,
+    borderRadius: SIZES.borderRadius + 2,
     borderWidth: SIZES.borderWidth,
-    borderColor: COLORS.primary,
+    borderColor: 'rgba(56, 189, 248, 0.45)',
     padding: SPACING.xl,
     ...SHADOWS.card,
   },
@@ -471,7 +674,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   inputGroup: {
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
   },
   inputLabel: {
     color: COLORS.textPrimary,
@@ -489,10 +692,85 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm + 4,
     outlineStyle: 'none',
+    ...webTransition,
+  },
+  inputFocused: {
+    borderColor: COLORS.primary,
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 0 0 3px rgba(56, 189, 248, 0.15)' }
+      : {}),
+  },
+  dropdownTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.background,
+    borderWidth: SIZES.borderWidth,
+    borderColor: COLORS.border,
+    borderRadius: SIZES.borderRadius,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm + 4,
+    ...webTransition,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
+  },
+  dropdownText: {
+    color: COLORS.textPrimary,
+    fontSize: SIZES.body,
+  },
+  dropdownMenu: {
+    marginTop: SPACING.xs,
+    backgroundColor: COLORS.background,
+    borderWidth: SIZES.borderWidth,
+    borderColor: COLORS.primary,
+    borderRadius: SIZES.borderRadius,
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm + 2,
+    ...webTransition,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
+  },
+  dropdownItemActive: {
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+  },
+  dropdownItemText: {
+    color: COLORS.textSecondary,
+    fontSize: SIZES.body - 1,
+  },
+  dropdownItemTextActive: {
+    color: COLORS.primary,
+    fontWeight: FONTS.weightBold,
   },
   textArea: {
-    minHeight: 130,
+    minHeight: 115,
     paddingTop: SPACING.md,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
+  },
+  checkboxBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: SIZES.borderWidth,
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+    ...webTransition,
+  },
+  checkboxBoxChecked: {
+    backgroundColor: COLORS.primary,
+  },
+  checkboxLabel: {
+    color: COLORS.textSecondary,
+    fontSize: SIZES.body - 1,
+    flex: 1,
   },
   statusBox: {
     borderRadius: SIZES.borderRadius,
@@ -526,9 +804,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: SPACING.xs,
+    ...webTransition,
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
+  },
+  submitButtonHovered: {
+    transform: [{ translateY: -3 }],
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 10px 24px -6px rgba(56, 189, 248, 0.55)' }
+      : {}),
   },
   submitButtonDisabled: {
     opacity: 0.6,
+  },
+  buttonPressed: {
+    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
   },
   submitButtonText: {
     color: COLORS.background,
