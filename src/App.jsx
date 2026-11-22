@@ -1,4 +1,4 @@
-// src/App.jsx
+
 import { useState, useRef } from 'react'; 
 import { View, StyleSheet, ScrollView, useWindowDimensions } from 'react-native';
 import Navbar from './components/Navbar';

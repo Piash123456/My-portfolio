@@ -1,202 +1,370 @@
-// src/components/Contact.jsx
+
 import { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, useWindowDimensions, Linking, TouchableOpacity, Animated, Pressable, Platform, Image } from 'react-native';
-import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS, ANIMATIONS } from '../theme/theme';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  useWindowDimensions,
+  Pressable,
+  Platform,
+  Linking,
+} from 'react-native';
+import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS } from '../theme/theme';
 import FadeInView from './FadeInView';
-import PremiumButton from './PremiumButton';
 
-// 100% Browser-Safe URL-Encoded SVG Icons (Fixes the blank box issue)
-const ICONS = {
-  emailInfo: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394A3B8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%204h16c1.1%200%202%20.9%202%202v12c0%201.1-.9%202-2%202H4c-1.1%200-2-.9-2-2V6c0-1.1.9-2%202-2z%22%3E%3C%2Fpath%3E%3Cpolyline%20points%3D%2222%2C6%2012%2C13%202%2C6%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E',
-  phoneInfo: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394A3B8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M22%2016.92v3a2%202%200%200%201-2.18%202%2019.79%2019.79%200%200%201-8.63-3.07%2019.5%2019.5%200%200%201-6-6%2019.79%2019.79%200%200%201-3.07-8.67A2%202%200%200%201%204.11%202h3a2%202%200%200%201%202%201.72%2012.84%2012.84%200%200%200%20.7%202.81%202%202%200%200%201-.45%202.11L8.09%209.91a16%2016%200%200%200%206%206l1.27-1.27a2%202%200%200%201%202.11-.45%2012.84%2012.84%200%200%200%202.81.7A2%202%200%200%201%2022%2016.92z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E',
-  locationInfo: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394A3B8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%2010c0%207-9%2013-9%2013s-9-6-9-13a9%209%200%200%201%2018%200z%22%3E%3C%2Fpath%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2210%22%20r%3D%223%22%3E%3C%2Fcircle%3E%3C%2Fsvg%3E',
-  githubSocial: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2338BDF8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2019c-5%201.5-5-2.5-7-3m14%206v-3.87a3.37%203.37%200%200%200-.94-2.61c3.14-.35%206.44-1.54%206.44-7A5.44%205.44%200%200%200%2020%204.77%205.07%205.07%200%200%200%2019.91%201S18.73.65%2016%202.48a13.38%2013.38%200%200%200-7%200C6.27.65%205.09%201%205.09%201A5.07%205.07%200%200%200%205%204.77a5.44%205.44%200%200%200-1.5%203.78c0%205.42%203.3%206.61%206.44%207A3.37%203.37%200%200%200%209%2018.13V22%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E',
-  linkedinSocial: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2338BDF8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M16%208a6%206%200%200%201%206%206v7h-4v-7a2%202%200%200%200-2-2%202%202%200%200%200-2%202v7h-4v-7a6%206%200%200%201%206-6z%22%3E%3C%2Fpath%3E%3Crect%20x%3D%222%22%20y%3D%229%22%20width%3D%224%22%20height%3D%2212%22%3E%3C%2Frect%3E%3Ccircle%20cx%3D%224%22%20cy%3D%224%22%20r%3D%222%22%3E%3C%2Fcircle%3E%3C%2Fsvg%3E',
-  instagramSocial: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2338BDF8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222%22%20y%3D%222%22%20width%3D%2220%22%20height%3D%2220%22%20rx%3D%225%22%20ry%3D%225%22%3E%3C%2Frect%3E%3Cpath%20d%3D%22M16%2011.37A4%204%200%201%201%2012.63%208%204%204%200%200%201%2016%2011.37z%22%3E%3C%2Fpath%3E%3Cline%20x1%3D%2217.5%22%20y1%3D%226.5%22%20x2%3D%2217.51%22%20y2%3D%226.5%22%3E%3C%2Fline%3E%3C%2Fsvg%3E',
-  emailSocial: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2338BDF8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%204h16c1.1%200%202%20.9%202%202v12c0%201.1-.9%202-2%202H4c-1.1%200-2-.9-2-2V6c0-1.1.9-2%202-2z%22%3E%3C%2Fpath%3E%3Cpolyline%20points%3D%2222%2C6%2012%2C13%202%2C6%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'
-};
+// Google Apps Script Web App endpoint for saving messages to Google Sheets
+const GOOGLE_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbzk7giOhvsT0DYKGozxACYNfivZlZFMozg9gczAn3_x0wrFn56-ZHdbQ88CZSXt2FO4jg/exec';
 
-// Safe Hover Wrapper 
-const HoverContactCard = ({ children, style }) => {
-  const [hoverAnim] = useState(() => new Animated.Value(0)); 
-
-  const handleHoverIn = () => Animated.spring(hoverAnim, { toValue: 1, tension: ANIMATIONS.hoverTension, friction: ANIMATIONS.hoverFriction, useNativeDriver: false }).start();
-  const handleHoverOut = () => Animated.spring(hoverAnim, { toValue: 0, tension: ANIMATIONS.hoverTension, friction: ANIMATIONS.hoverFriction, useNativeDriver: false }).start();
-
-  const animatedStyle = {
-    transform: [
-      { translateY: hoverAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -10] }) }, 
-      { scale: hoverAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.02] }) } 
-    ],
-    shadowOpacity: hoverAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0.6] }),
-    borderColor: hoverAnim.interpolate({ inputRange: [0, 1], outputRange: [COLORS.border, COLORS.primary] }),
+// Lightweight inline SVG icons (no external icon package required)
+const ContactIcon = ({ type, color }) => {
+  const props = {
+    width: 18,
+    height: 18,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: color,
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
   };
 
-  return (
-    <Animated.View style={[style, animatedStyle]}>
-      <Pressable 
-        onHoverIn={Platform.OS === 'web' ? handleHoverIn : null} 
-        onHoverOut={Platform.OS === 'web' ? handleHoverOut : null}
-        style={{ width: '100%', alignItems: 'center' }}
-      >
-        {children}
-      </Pressable>
-    </Animated.View>
-  );
+  switch (type) {
+    case 'email':
+      return (
+        <svg {...props}>
+          <rect width="20" height="16" x="2" y="4" rx="2" />
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+        </svg>
+      );
+    case 'phone':
+      return (
+        <svg {...props}>
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+        </svg>
+      );
+    case 'location':
+      return (
+        <svg {...props}>
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+      );
+    case 'github':
+      return (
+        <svg {...props}>
+          <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+          <path d="M9 18c-4.51 2-5-2-7-2" />
+        </svg>
+      );
+    case 'linkedin':
+      return (
+        <svg {...props}>
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+          <rect width="4" height="12" x="2" y="9" />
+          <circle cx="4" cy="4" r="2" />
+        </svg>
+      );
+    case 'instagram':
+      return (
+        <svg {...props}>
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+        </svg>
+      );
+    default:
+      return null;
+  }
 };
 
-// Reusable Info Card Component with Vector SVG
-const InfoCard = ({ iconUri, label, value }) => (
-  <View style={styles.infoCard}>
-    <View style={styles.iconCircle}>
-      <Image source={{ uri: iconUri }} style={styles.iconImage} resizeMode="contain" />
-    </View>
-    <View style={styles.infoContent}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
-    </View>
-  </View>
-);
+// Contact info cards data
+const CONTACT_INFO = [
+  {
+    id: 1,
+    type: 'email',
+    label: 'Email',
+    value: 'rpiash76@gmail.com',
+    href: 'mailto:rpiash76@gmail.com',
+  },
+  {
+    id: 2,
+    type: 'phone',
+    label: 'Phone',
+    value: '01308129532',
+    href: 'tel:01308129532',
+  },
+  {
+    id: 3,
+    type: 'location',
+    label: 'Location',
+    value: 'Mirpur, Dhaka',
+    href: null,
+  },
+];
 
-// Sleek Social Icon Component with Vector SVG
-const SocialIcon = ({ iconUri, url }) => (
-  <TouchableOpacity style={styles.socialCircle} onPress={() => Linking.openURL(url)}>
-    <Image source={{ uri: iconUri }} style={styles.socialImage} resizeMode="contain" />
-  </TouchableOpacity>
-);
-
-// Custom Input Component
-const CustomInput = ({ label, placeholder, multiline, value, onChangeText, containerStyle }) => (
-  <View style={[styles.inputGroup, containerStyle]}>
-    <Text style={styles.inputLabel}>{label}</Text>
-    <TextInput
-      style={[styles.input, multiline && styles.textArea]}
-      placeholder={placeholder}
-      placeholderTextColor={COLORS.textSecondary + '80'} 
-      multiline={multiline}
-      numberOfLines={multiline ? 5 : 1}
-      value={value}
-      onChangeText={onChangeText}
-      // @ts-ignore
-      outlineStyle="none"
-    />
-  </View>
-);
+// Social media links
+const SOCIAL_LINKS = [
+  { id: 1, type: 'github', url: 'https://github.com/Piash123456' },
+  { id: 2, type: 'linkedin', url: 'https://www.linkedin.com' },
+  { id: 3, type: 'instagram', url: 'https://www.instagram.com' },
+  { id: 4, type: 'email', url: 'mailto:rpiash76@gmail.com' },
+];
 
 export default function Contact() {
   const { width, height } = useWindowDimensions();
   const isMobile = width < BREAKPOINTS.tablet;
 
-  // Form States
+  // Form state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleSendMessage = () => {
-    alert('Thank you! Your message has been sent successfully.');
-    setName(''); setEmail(''); setSubject(''); setMessage('');
+  // Submission feedback state
+  const [isSending, setIsSending] = useState(false);
+  const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
+
+  // Open external links safely on web and mobile
+  const openExternalLink = (url) => {
+    if (!url) return;
+    if (Platform.OS === 'web') {
+      window.open(url, '_blank');
+    } else {
+      Linking.openURL(url);
+    }
+  };
+
+  // Send contact form payload to Google Sheets via Apps Script
+  const handleSendMessage = async () => {
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      setStatusMessage({
+        type: 'error',
+        text: 'Please fill in your Name, Email, and Message.',
+      });
+      return;
+    }
+
+    setIsSending(true);
+    setStatusMessage({ type: '', text: '' });
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          subject: subject.trim() || 'Portfolio Inquiry',
+          message: message.trim(),
+        }),
+      });
+
+      setStatusMessage({
+        type: 'success',
+        text: 'Message sent successfully! Thank you for reaching out.',
+      });
+
+      // Reset form inputs after successful submission
+      setName('');
+      setEmail('');
+      setSubject('');
+      setMessage('');
+    } catch {
+      setStatusMessage({
+        type: 'error',
+        text: 'Something went wrong. Please try again later.',
+      });
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
     <View style={[styles.fullScreenWrapper, { minHeight: height }]}>
       <View style={styles.sectionContainer}>
-        
-        <View style={[styles.layoutWrapper, { flexDirection: isMobile ? 'column' : 'row' }]}>
-          
-          {/* Left Column: Contact Information */}
-          <FadeInView delay={200} style={[styles.leftColumn, { paddingRight: isMobile ? 0 : SPACING.xxl }]}>
-            <Text style={[styles.heading, { fontSize: isMobile ? SIZES.headerMobile : SIZES.headerWeb }]}>
-              Let's talk about your project
-            </Text>
-            <Text style={styles.subtitle}>
-              I'm always interested in hearing about new projects and opportunities. 
-              Whether you have a question or just want to say hi, feel free to reach out!
-            </Text>
-
-            <View style={styles.cardsContainer}>
-              <InfoCard iconUri={ICONS.emailInfo} label="Email" value="rpiash76@gmail.com" />
-              <InfoCard iconUri={ICONS.phoneInfo} label="Phone" value="01308129532" />
-              <InfoCard iconUri={ICONS.locationInfo} label="Location" value="Mirpur, Dhaka" />
-            </View>
-
-            <View style={styles.socialContainer}>
-              <Text style={styles.socialTitle}>Follow me on social media</Text>
-              
-              <View style={styles.socialIconsRow}>
-                <SocialIcon 
-                  iconUri={ICONS.githubSocial} 
-                  url="https://github.com/Piash123456" 
-                />
-                <SocialIcon 
-                  iconUri={ICONS.linkedinSocial} 
-                  url="https://www.linkedin.com/in/md-shazzadur-rahman-piash-287345319?utm_source=share_via&utm_content=profile&utm_medium=member_android" 
-                />
-                <SocialIcon 
-                  iconUri={ICONS.instagramSocial} 
-                  url="https://www.instagram.com/mdshazzadurpiash/" 
-                />
-                <SocialIcon 
-                  iconUri={ICONS.emailSocial} 
-                  url="mailto:rpiash76@gmail.com" 
-                />
-              </View>
-            </View>
-          </FadeInView>
-
-          {/* Right Column: Contact Form */}
-          <FadeInView 
-            delay={400} 
-            animationType="slideUp" 
-            style={[styles.rightColumn, { marginTop: isMobile ? SPACING.xxl : 0 }]}
+        <View
+          style={[
+            styles.contentRow,
+            { flexDirection: isMobile ? 'column' : 'row' },
+          ]}
+        >
+          {/* Left column: heading, contact cards, and social icons */}
+          <FadeInView
+            delay={150}
+            style={[
+              styles.leftColumn,
+              {
+                width: isMobile ? '100%' : '46%',
+                marginRight: isMobile ? 0 : SPACING.xl,
+                marginBottom: isMobile ? SPACING.xl : 0,
+              },
+            ]}
           >
-            <HoverContactCard style={styles.formContainer}>
-              
-              <View style={[styles.row, { flexDirection: isMobile ? 'column' : 'row', width: '100%' }]}>
-                <CustomInput 
-                  label="Your Name" 
-                  placeholder="Your Name" 
-                  value={name} 
-                  onChangeText={setName} 
-                  containerStyle={{ flex: 1, marginRight: isMobile ? 0 : SPACING.md, marginBottom: isMobile ? SPACING.md : 0 }} 
-                />
-                <CustomInput 
-                  label="Your Email" 
-                  placeholder="your-email@gmail.com" 
-                  value={email} 
-                  onChangeText={setEmail} 
-                  containerStyle={{ flex: 1 }} 
-                />
-              </View>
+            <Text
+              style={[
+                styles.heading,
+                { fontSize: isMobile ? SIZES.headerMobile : SIZES.headerWeb },
+              ]}
+            >
+              Let&apos;s talk about your project
+            </Text>
 
-              <CustomInput 
-                label="Subject" 
-                placeholder="Project Inquiry" 
-                value={subject} 
-                onChangeText={setSubject} 
-                containerStyle={{ width: '100%' }}
-              />
-              
-              <CustomInput 
-                label="Message" 
-                placeholder="Tell me about your project..." 
-                multiline 
-                value={message} 
-                onChangeText={setMessage} 
-                containerStyle={{ width: '100%' }}
-              />
+            <Text style={styles.subtitle}>
+              I&apos;m always interested in hearing about new projects and
+              opportunities. Whether you have a question or just want to say hi,
+              feel free to reach out!
+            </Text>
 
-              <View style={{ width: '100%', marginTop: SPACING.md }}>
-                <PremiumButton 
-                  title="Send Message →" 
-                  variant="primary"
-                  onPress={handleSendMessage}
-                />
-              </View>
+            {/* Contact info cards */}
+            <View style={styles.infoList}>
+              {CONTACT_INFO.map((item) => (
+                <Pressable
+                  key={item.id}
+                  onPress={() => openExternalLink(item.href)}
+                  style={styles.infoCard}
+                >
+                  <View style={styles.infoIconBox}>
+                    <ContactIcon type={item.type} color={COLORS.textSecondary} />
+                  </View>
+                  <View>
+                    <Text style={styles.infoLabel}>{item.label}</Text>
+                    <Text style={styles.infoValue}>{item.value}</Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
 
-            </HoverContactCard>
+            {/* Social links */}
+            <Text style={styles.socialHeading}>Follow me on social media</Text>
+            <View style={styles.socialRow}>
+              {SOCIAL_LINKS.map((social) => (
+                <Pressable
+                  key={social.id}
+                  onPress={() => openExternalLink(social.url)}
+                  style={styles.socialCircle}
+                >
+                  <ContactIcon type={social.type} color={COLORS.primary} />
+                </Pressable>
+              ))}
+            </View>
           </FadeInView>
 
+          {/* Right column: interactive contact form */}
+          <FadeInView
+            delay={300}
+            style={[
+              styles.rightColumn,
+              { width: isMobile ? '100%' : '50%' },
+            ]}
+          >
+            <View style={styles.formCard}>
+              <View
+                style={[
+                  styles.inputRow,
+                  { flexDirection: isMobile ? 'column' : 'row' },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.inputGroup,
+                    {
+                      flex: 1,
+                      marginRight: isMobile ? 0 : SPACING.md,
+                    },
+                  ]}
+                >
+                  <Text style={styles.inputLabel}>Your Name</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Your Name"
+                    placeholderTextColor={COLORS.textSecondary}
+                    value={name}
+                    onChangeText={setName}
+                  />
+                </View>
+
+                <View style={[styles.inputGroup, { flex: 1 }]}>
+                  <Text style={styles.inputLabel}>Your Email</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="your-email@gmail.com"
+                    placeholderTextColor={COLORS.textSecondary}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={email}
+                    onChangeText={setEmail}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Subject</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Project Inquiry"
+                  placeholderTextColor={COLORS.textSecondary}
+                  value={subject}
+                  onChangeText={setSubject}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Message</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Tell me about your project..."
+                  placeholderTextColor={COLORS.textSecondary}
+                  multiline
+                  numberOfLines={5}
+                  textAlignVertical="top"
+                  value={message}
+                  onChangeText={setMessage}
+                />
+              </View>
+
+              {/* Inline status feedback */}
+              {statusMessage.text ? (
+                <View
+                  style={[
+                    styles.statusBox,
+                    statusMessage.type === 'success'
+                      ? styles.statusSuccess
+                      : styles.statusError,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusText,
+                      statusMessage.type === 'success'
+                        ? styles.statusTextSuccess
+                        : styles.statusTextError,
+                    ]}
+                  >
+                    {statusMessage.text}
+                  </Text>
+                </View>
+              ) : null}
+
+              <Pressable
+                onPress={handleSendMessage}
+                disabled={isSending}
+                style={({ pressed }) => [
+                  styles.submitButton,
+                  isSending && styles.submitButtonDisabled,
+                  pressed && { opacity: 0.85 },
+                ]}
+              >
+                <Text style={styles.submitButtonText}>
+                  {isSending ? 'Sending...' : 'Send Message →'}
+                </Text>
+              </Pressable>
+            </View>
+          </FadeInView>
         </View>
       </View>
     </View>
@@ -204,36 +372,167 @@ export default function Contact() {
 }
 
 const styles = StyleSheet.create({
-  fullScreenWrapper: { width: '100%', justifyContent: 'center', paddingTop: SIZES.navHeight },
-  sectionContainer: { width: '100%', marginBottom: SPACING.xxl },
-  layoutWrapper: { width: '100%', justifyContent: 'space-between' },
-  
-  // Left Column
-  leftColumn: { flex: 1, justifyContent: 'center' },
-  heading: { color: COLORS.textPrimary, fontWeight: FONTS.weightBold, marginBottom: SPACING.md },
-  subtitle: { color: COLORS.textSecondary, fontSize: SIZES.body, lineHeight: 24, marginBottom: SPACING.xl },
-  cardsContainer: { marginBottom: SPACING.xl },
-  
-  infoCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.surface, padding: SPACING.md, borderRadius: SIZES.borderRadius, marginBottom: SPACING.md, borderWidth: 1, borderColor: COLORS.border },
-  iconCircle: { width: 45, height: 45, borderRadius: 8, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center', marginRight: SPACING.md, borderWidth: 1, borderColor: COLORS.border },
-  iconImage: { width: 22, height: 22 },
-  infoContent: { flex: 1 },
-  infoLabel: { color: COLORS.textSecondary, fontSize: SIZES.body - 2, marginBottom: 2 },
-  infoValue: { color: COLORS.textPrimary, fontSize: SIZES.body, fontWeight: FONTS.weightBold },
-  
-  // Social Icons
-  socialContainer: { marginTop: SPACING.md },
-  socialTitle: { color: COLORS.textSecondary, fontSize: SIZES.body, marginBottom: SPACING.md },
-  socialIconsRow: { flexDirection: 'row', gap: SPACING.md },
-  socialCircle: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: COLORS.primary },
-  socialImage: { width: 20, height: 20 },
-
-  // Right Column
-  rightColumn: { flex: 1, justifyContent: 'center' },
-  formContainer: { backgroundColor: COLORS.surface, padding: SPACING.xl, borderRadius: SIZES.borderRadius * 1.5, borderWidth: 1, borderColor: COLORS.border, ...SHADOWS.card, width: '100%' },
-  row: { justifyContent: 'space-between' },
-  inputGroup: { marginBottom: SPACING.lg },
-  inputLabel: { color: COLORS.textPrimary, fontSize: SIZES.body - 2, fontWeight: FONTS.weightBold, marginBottom: SPACING.xs },
-  input: { backgroundColor: COLORS.background, color: COLORS.textPrimary, fontSize: SIZES.body, padding: SPACING.md, borderRadius: SIZES.borderRadius, borderWidth: 1, borderColor: COLORS.border, width: '100%' },
-  textArea: { minHeight: 120, textAlignVertical: 'top' }
+  fullScreenWrapper: {
+    width: '100%',
+    justifyContent: 'center',
+    paddingTop: SIZES.navHeight + SPACING.lg,
+  },
+  sectionContainer: {
+    width: '100%',
+    marginBottom: SPACING.xxl,
+  },
+  contentRow: {
+    width: '100%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  leftColumn: {
+    justifyContent: 'center',
+  },
+  heading: {
+    color: COLORS.textPrimary,
+    fontWeight: FONTS.weightBold,
+    marginBottom: SPACING.md,
+    lineHeight: 46,
+  },
+  subtitle: {
+    color: COLORS.textSecondary,
+    fontSize: SIZES.body,
+    lineHeight: 24,
+    marginBottom: SPACING.xl,
+  },
+  infoList: {
+    marginBottom: SPACING.xl,
+  },
+  infoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: SIZES.borderRadius,
+    borderWidth: SIZES.borderWidth,
+    borderColor: COLORS.border,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  infoIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: SIZES.borderRadius,
+    backgroundColor: COLORS.background,
+    borderWidth: SIZES.borderWidth,
+    borderColor: COLORS.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  infoLabel: {
+    color: COLORS.textSecondary,
+    fontSize: SIZES.body - 2,
+    marginBottom: 2,
+  },
+  infoValue: {
+    color: COLORS.textPrimary,
+    fontSize: SIZES.body,
+    fontWeight: FONTS.weightBold,
+  },
+  socialHeading: {
+    color: COLORS.textSecondary,
+    fontSize: SIZES.body,
+    marginBottom: SPACING.md,
+  },
+  socialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  socialCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: SIZES.borderWidth,
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  rightColumn: {
+    justifyContent: 'center',
+  },
+  formCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: SIZES.borderRadius,
+    borderWidth: SIZES.borderWidth,
+    borderColor: COLORS.primary,
+    padding: SPACING.xl,
+    ...SHADOWS.card,
+  },
+  inputRow: {
+    width: '100%',
+    justifyContent: 'space-between',
+  },
+  inputGroup: {
+    marginBottom: SPACING.lg,
+  },
+  inputLabel: {
+    color: COLORS.textPrimary,
+    fontSize: SIZES.body - 1,
+    fontWeight: FONTS.weightBold,
+    marginBottom: SPACING.xs,
+  },
+  input: {
+    backgroundColor: COLORS.background,
+    borderWidth: SIZES.borderWidth,
+    borderColor: COLORS.border,
+    borderRadius: SIZES.borderRadius,
+    color: COLORS.textPrimary,
+    fontSize: SIZES.body,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm + 4,
+    outlineStyle: 'none',
+  },
+  textArea: {
+    minHeight: 130,
+    paddingTop: SPACING.md,
+  },
+  statusBox: {
+    borderRadius: SIZES.borderRadius,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: SIZES.borderWidth,
+  },
+  statusSuccess: {
+    backgroundColor: 'rgba(34, 197, 94, 0.12)',
+    borderColor: '#22C55E',
+  },
+  statusError: {
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    borderColor: '#EF4444',
+  },
+  statusText: {
+    fontSize: SIZES.body - 1,
+    fontWeight: FONTS.weightBold,
+    textAlign: 'center',
+  },
+  statusTextSuccess: {
+    color: '#4ADE80',
+  },
+  statusTextError: {
+    color: '#F87171',
+  },
+  submitButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: SIZES.borderRadius,
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.xs,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  submitButtonText: {
+    color: COLORS.background,
+    fontSize: SIZES.body + 1,
+    fontWeight: FONTS.weightBold,
+  },
 });

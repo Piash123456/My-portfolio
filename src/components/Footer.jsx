@@ -1,4 +1,4 @@
-// src/components/Footer.jsx
+
 import { View, Text, StyleSheet, TouchableOpacity, Linking, useWindowDimensions } from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS } from '../theme/theme';
 

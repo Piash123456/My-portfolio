@@ -1,4 +1,4 @@
-// src/components/PageTransition.jsx
+
 import { useEffect, useState } from 'react';
 import { Animated } from 'react-native';
 import { ANIMATIONS } from '../theme/theme';

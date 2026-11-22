@@ -1,4 +1,4 @@
-// src/components/Hero.jsx
+
 import { useState } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions, Animated, Image, Platform, Pressable } from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS, ANIMATIONS } from '../theme/theme';

@@ -1,4 +1,4 @@
-// src/components/Navbar.jsx
+
 import { useState } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions, TouchableOpacity, Animated } from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS, ANIMATIONS } from '../theme/theme';

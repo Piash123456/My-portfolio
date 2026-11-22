@@ -1,4 +1,4 @@
-// src/components/Skills.jsx
+
 import { useState } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions, Pressable, Animated, Platform, Image } from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS, ANIMATIONS } from '../theme/theme';
