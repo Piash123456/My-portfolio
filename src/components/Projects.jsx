@@ -33,7 +33,7 @@ const PROJECTS = [
     tags: ['React Native', 'Mobile Dev', 'Firebase'],
     image:
       'https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=800&q=80',
-    repoUrl: 'https://github.com/Piash123456',
+    repoUrl: 'https://github.com/Piash123456/LifeOS',
   },
   {
     id: 3,
@@ -53,7 +53,7 @@ const PROJECTS = [
     tags: ['Flutter', 'Riverpod', 'Dio'],
     image:
       'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?auto=format&fit=crop&w=800&q=80',
-    repoUrl: 'https://github.com/Piash123456',
+    repoUrl: 'https://github.com/Piash123456/weather-app-flutter',
   },
   {
     id: 5,
@@ -63,7 +63,7 @@ const PROJECTS = [
     tags: ['Python', 'XGBoost', 'SHAP'],
     image:
       'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
-    repoUrl: 'https://github.com/Piash123456',
+    repoUrl: 'https://github.com/Piash123456/Student-Dropout-Prediction',
   },
   {
     id: 6,
@@ -73,7 +73,7 @@ const PROJECTS = [
     tags: ['Flutter', 'Dart', 'Firebase'],
     image:
       'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80',
-    repoUrl: 'https://github.com/Piash123456',
+    repoUrl: 'https://github.com/Piash123456/Speakup-Chatapp',
   },
 ];
 
