@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   View,
@@ -11,8 +10,8 @@ import {
 } from 'react-native';
 import { COLORS, SPACING, SIZES, BREAKPOINTS, FONTS, SHADOWS } from '../theme/theme';
 
-// Path to your resume PDF inside the Vite "public" folder (e.g., public/resume.pdf)
-const RESUME_URL = '/resume.pdf';
+// Path to your CV PDF inside the Vite "public" folder (public/Piash_CV.pdf)
+const RESUME_URL = '/Piash_CV.pdf';
 
 // Navigation items mapped to section IDs defined in App.jsx
 const NAV_ITEMS = [
@@ -78,12 +77,12 @@ export default function Navbar({ scrollToSection, activeSection }) {
     setMenuOpen(false);
   };
 
-  // Trigger resume download on web or open externally on mobile
+  // Trigger CV download on web or open externally on mobile
   const handleDownloadResume = () => {
     if (Platform.OS === 'web') {
       const link = document.createElement('a');
       link.href = RESUME_URL;
-      link.download = 'Md_Shazzadur_Rahman_Piash_Resume.pdf';
+      link.download = 'Md_Shazzadur_Rahman_Piash_CV.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
